@@ -12,6 +12,8 @@
         { "file": "MathlibLatest/Rational.lean",
           "name": "Rational" }]},
     { "folder": "lean4web-tools",
-      "name": "Stable Lean" }
+      "name": "Stable Lean" },
+    { "folder": "mathematics_in_lean",
+      "name": "Mathematics in Lean" }
   ]
 }

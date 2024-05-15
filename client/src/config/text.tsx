@@ -5,14 +5,10 @@ import React from "react"
  * contactInformation: React fragment like `<>blah blah</>` to be inserted inside a `<p>`. Alternatively `null` to be ommitted.
  */
 export const text = {
-  serverCountry: 'Germany',
+  serverCountry: 'China',
   contactInformation: <>
-      <a href="https://www.math.hhu.de/lehrstuehle-/-personen-/-ansprechpartner/innen/lehrstuehle-des-mathematischen-instituts/lehrstuhl-fuer-algebraische-geometrie/team/dr-alexander-bentkamp">Alexander Bentkamp</a>,&nbsp;
-      <a href="https://www.math.hhu.de/lehrstuehle-/-personen-/-ansprechpartner/innen/lehrstuehle-des-mathematischen-instituts/lehrstuhl-fuer-algebraische-geometrie/team/jon-eugster">Jon Eugster</a><br />
-      Mathematisches Institut der Heinrich-Heine-Universität Düsseldorf<br />
-      Universitätsstr. 1<br />
-      40225 Düsseldorf<br />
-      Germany<br />
-      +49 211 81-12173<br />
+      Tao Yicheng <br />
+      School of mathematics, Renmin University of China<br />
+      tyc221@ruc.edu.cn<br />
     </>
 }
