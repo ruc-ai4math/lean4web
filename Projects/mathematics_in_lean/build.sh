@@ -14,3 +14,4 @@ curl -L https://github.com/leanprover-community/mathematics_in_lean/raw/master/l
 # note: mathlib has now a post-update hook that modifies the `lean-toolchain`
 # and calls `lake exe cache get`.
 lake update -R
+lake build
