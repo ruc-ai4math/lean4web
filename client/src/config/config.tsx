@@ -3,7 +3,7 @@ import { LeanWebConfig } from './docs' // look here for documentation of the ind
 const lean4webConfig : LeanWebConfig = {
   "projects": [
     { "folder": "mathlib-demo",
-      "name": "Latest Mathlib",
+      "name": "Mathlib-demo",
       "examples": [
         { "file": "MathlibLatest/Bijection.lean",
           "name": "Bijection" },
@@ -14,10 +14,14 @@ const lean4webConfig : LeanWebConfig = {
         { "file": "MathlibLatest/Rational.lean",
           "name": "Rational" }]},
     { "folder": "stable",
-      "name": "Stable Lean" }
+      "name": "Stable Lean" },
+    {
+      "folder": "mathematics_in_lean",
+      "name": "mathematics_in_lean",
+    }
   ],
-  "serverCountry": null,
-  "contactDetails": null,
+  "serverCountry": "China",
+  "contactDetails": <p>Tao Yicheng: tyc221@ruc.edu.cn</p>,
   "impressum": null
 }
 

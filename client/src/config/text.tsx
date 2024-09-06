@@ -1,4 +1,3 @@
-import React from "react"
 
 /**
  * serverCountry: string or `null`.
