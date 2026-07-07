@@ -1,7 +1,11 @@
 import '../css/Modal.css'
 import '../css/Navigation.css'
 
-import { faArrowRotateRight, faCode, faInfoCircle } from '@fortawesome/free-solid-svg-icons'
+import {
+  faArrowRotateRight,
+  faCode,
+  faInfoCircle,
+} from '@fortawesome/free-solid-svg-icons'
 import {
   faArrowUpRightFromSquare,
   faBars,
@@ -22,17 +26,24 @@ import { lean4webConfig } from '../../config'
 import ZulipIcon from '../assets/zulip.svg'
 import { codeAtom } from '../editor/code-atoms'
 import ImpressumPopup from '../Popups/Impressum'
+import JoinCollaborationPopup from '../Popups/JoinCollaboration'
 import LoadUrlPopup from '../Popups/LoadUrl'
 import LoadZulipPopup from '../Popups/LoadZulip'
 import PrivacyPopup from '../Popups/PrivacyPolicy'
 import ToolsPopup from '../Popups/Tools'
 import { mobileAtom } from '../settings/settings-atoms'
 import { SettingsPopup } from '../settings/SettingsPopup'
+import { isCollaboratingAtom } from '../store/collaboration-atoms'
 import { setImportUrlAndProjectAtom } from '../store/import-atoms'
-import { currentProjectAtom, projectsAtom, visibleProjectsAtom } from '../store/project-atoms'
+import {
+  currentProjectAtom,
+  projectsAtom,
+  visibleProjectsAtom,
+} from '../store/project-atoms'
 import { save } from '../utils/SaveToFile'
 import { Dropdown } from './Dropdown'
 import { NavButton } from './NavButton'
+import RotatingGlobe from './RotatingGlobe'
 
 /** The menu items either appearing inside the dropdown or outside */
 function FlexibleMenu({
@@ -45,6 +56,7 @@ function FlexibleMenu({
   setContent,
   setLoadUrlOpen,
   setLoadZulipOpen,
+  setJoinCollabOpen,
 }: {
   isInDropdown: boolean
   setOpenNav: Dispatch<SetStateAction<boolean>>
@@ -55,7 +67,10 @@ function FlexibleMenu({
   setContent: (code: string) => void
   setLoadUrlOpen: Dispatch<SetStateAction<boolean>>
   setLoadZulipOpen: Dispatch<SetStateAction<boolean>>
+  setJoinCollabOpen: Dispatch<SetStateAction<boolean>>
 }) {
+  const ENABLE_COLLAB = import.meta.env.VITE_COLLAB != 'false'
+  const [isCollaborating] = useAtom(isCollaboratingAtom)
   const [, setImportUrlAndProject] = useAtom(setImportUrlAndProjectAtom)
   const [{ data: projects }] = useAtom(projectsAtom)
   const loadFileFromDisk = (event: ChangeEvent<HTMLInputElement>) => {
@@ -81,7 +96,7 @@ function FlexibleMenu({
         useOverlay={isInDropdown}
         onClick={() => {
           setOpenLoad(false)
-          !isInDropdown && setOpenNav(false)
+          if (!isInDropdown) setOpenNav(false)
         }}
       >
         {projects.map((it) =>
@@ -110,7 +125,7 @@ function FlexibleMenu({
         useOverlay={isInDropdown}
         onClick={() => {
           setOpenExample(false)
-          !isInDropdown && setOpenNav(false)
+          if (!isInDropdown) setOpenNav(false)
         }}
       >
         <input
@@ -121,7 +136,12 @@ function FlexibleMenu({
         />
         {/* Need `ev.stopPropagation` to prevent closing until the file is loaded.
           Otherwise the file-upload is destroyed too early. */}
-        <label htmlFor="file-upload" className="nav-link" onClick={(ev) => ev.stopPropagation()}>
+        {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events jsx-a11y/no-noninteractive-element-interactions */}
+        <label
+          htmlFor="file-upload"
+          className="nav-link"
+          onClick={(ev) => ev.stopPropagation()}
+        >
           <FontAwesomeIcon icon={faUpload} /> Load file from disk
         </label>
         <NavButton
@@ -139,6 +159,15 @@ function FlexibleMenu({
           }}
         />
       </Dropdown>
+      {ENABLE_COLLAB && !isCollaborating && (
+        <NavButton
+          iconElement={<RotatingGlobe />}
+          text="Collaborate"
+          onClick={() => {
+            setJoinCollabOpen(true)
+          }}
+        />
+      )}
     </>
   )
 }
@@ -149,11 +178,13 @@ export function Menu({
   restart,
   codeMirror,
   setCodeMirror,
+  handleJoinCollab,
 }: {
   setContent: (code: string) => void
   restart?: () => void
   codeMirror: boolean
   setCodeMirror: Dispatch<SetStateAction<boolean>>
+  handleJoinCollab: () => void
 }) {
   const [visibleProjects] = useAtom(visibleProjectsAtom)
   const [project, setProject] = useAtom(currentProjectAtom)
@@ -165,6 +196,7 @@ export function Menu({
   const [openLoad, setOpenLoad] = useState(false)
   const [loadUrlOpen, setLoadUrlOpen] = useState(false)
   const [loadZulipOpen, setLoadZulipOpen] = useState(false)
+  const [joinCollabOpen, setJoinCollabOpen] = useState(false)
 
   // state for the popups
   const [privacyOpen, setPrivacyOpen] = useState(false)
@@ -177,7 +209,7 @@ export function Menu({
   const hasImpressum = lean4webConfig.impressum || lean4webConfig.contactDetails
 
   return (
-    <div className="menu">
+    <>
       {project && (
         <select
           name="leanVersion"
@@ -215,6 +247,7 @@ export function Menu({
           setContent={setContent}
           setLoadUrlOpen={setLoadUrlOpen}
           setLoadZulipOpen={setLoadZulipOpen}
+          setJoinCollabOpen={setJoinCollabOpen}
         />
       )}
       <Dropdown
@@ -237,6 +270,7 @@ export function Menu({
             setContent={setContent}
             setLoadUrlOpen={setLoadUrlOpen}
             setLoadZulipOpen={setLoadZulipOpen}
+            setJoinCollabOpen={setJoinCollabOpen}
           />
         )}
         <NavButton
@@ -246,13 +280,21 @@ export function Menu({
             setSettingsOpen(true)
           }}
         />
-        <NavButton icon={faHammer} text="Lean Info" onClick={() => setToolsOpen(true)} />
-        <NavButton icon={faArrowRotateRight} text="Restart server" onClick={restart} />
+        <NavButton
+          icon={faHammer}
+          text="Lean Info"
+          onClick={() => setToolsOpen(true)}
+        />
+        <NavButton
+          icon={faArrowRotateRight}
+          text="Restart server"
+          onClick={restart}
+        />
         <NavButton
           icon={faDownload}
-          text="Save file"
+          text="Save"
           onClick={() => {
-            if (code !== undefined) save(code)
+            if (code !== undefined) save(code, project?.folder)
           }}
         />
         <NavButton
@@ -276,16 +318,26 @@ export function Menu({
           text="Lean community"
           href="https://leanprover-community.github.io/"
         />
-        <NavButton icon={faArrowUpRightFromSquare} text="Lean FRO" href="https://lean-lang.org" />
+        <NavButton
+          icon={faArrowUpRightFromSquare}
+          text="Lean FRO"
+          href="https://lean-lang.org"
+        />
         <NavButton
           icon={faArrowUpRightFromSquare}
           text="GitHub"
           href="https://github.com/leanprover-community/lean4web"
         />
       </Dropdown>
-      <PrivacyPopup open={privacyOpen} handleClose={() => setPrivacyOpen(false)} />
+      <PrivacyPopup
+        open={privacyOpen}
+        handleClose={() => setPrivacyOpen(false)}
+      />
       {hasImpressum && (
-        <ImpressumPopup open={impressumOpen} handleClose={() => setImpressumOpen(false)} />
+        <ImpressumPopup
+          open={impressumOpen}
+          handleClose={() => setImpressumOpen(false)}
+        />
       )}
       {project && (
         <ToolsPopup
@@ -299,12 +351,22 @@ export function Menu({
         handleClose={() => setSettingsOpen(false)}
         closeNav={() => setOpenNav(false)}
       />
-      <LoadUrlPopup open={loadUrlOpen} handleClose={() => setLoadUrlOpen(false)} />
+      <LoadUrlPopup
+        open={loadUrlOpen}
+        handleClose={() => setLoadUrlOpen(false)}
+      />
       <LoadZulipPopup
         open={loadZulipOpen}
         handleClose={() => setLoadZulipOpen(false)}
         setContent={setContent}
       />
-    </div>
+      <JoinCollaborationPopup
+        open={joinCollabOpen}
+        handleJoinCollab={handleJoinCollab}
+        handleClose={() => {
+          setJoinCollabOpen(false)
+        }}
+      />
+    </>
   )
 }

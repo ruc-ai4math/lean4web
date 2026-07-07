@@ -4,7 +4,7 @@ import { atomWithQuery } from 'jotai-tanstack-query'
 import { LeanWebProject } from '../api/project-types'
 import { urlArgsAtom, urlArgsStableAtom } from './url-atoms'
 
-const projectsQueryAtom = atomWithQuery<LeanWebProject[]>((get) => ({
+const projectsQueryAtom = atomWithQuery<LeanWebProject[]>(() => ({
   queryKey: ['projects'],
   queryFn: async () => {
     const res = await fetch(`/api/projects`)
@@ -12,10 +12,19 @@ const projectsQueryAtom = atomWithQuery<LeanWebProject[]>((get) => ({
   },
 }))
 
-/** Sort alphabetically while the `default` project always comes first */
+/**
+ * Sort alphabetically while the `default` project always comes first, then
+ * order by descending sortOrder (nullish treated as 0), then order by name.
+ */
 function sortProjects(p: LeanWebProject, q: LeanWebProject): number {
   if (p.config.default) return -1
   if (q.config.default) return 1
+
+  // Secondary sort: sortOrder field
+  const n = q.config.sortOrder - p.config.sortOrder
+  if (n !== 0) return n
+
+  // Fallback: names
   return p.config.name.localeCompare(q.config.name)
 }
 
@@ -35,7 +44,9 @@ export const defaultProjectAtom = atom((get) => {
     return projects[0]
   }
   if (defaultProjects.length > 1) {
-    console.error(`Expected exactly one default project, but found ${defaultProjects.length}`)
+    console.error(
+      `Expected exactly one default project, but found ${defaultProjects.length}`,
+    )
   }
   return defaultProjects[0]
 })
@@ -49,8 +60,9 @@ export const currentProjectAtom = atom(
     if (!urlArgProject) return defaultProject
     if (!urlArgProject) return defaultProject
     return (
-      allProjects.find((it) => it.folder.toLowerCase() == urlArgProject.toLowerCase()) ??
-      defaultProject
+      allProjects.find(
+        (it) => it.folder.toLowerCase() == urlArgProject.toLowerCase(),
+      ) ?? defaultProject
     )
   },
   (get, set, project: string) => {
@@ -59,7 +71,9 @@ export const currentProjectAtom = atom(
     set(urlArgsAtom, {
       ...urlArgs,
       project:
-        defaultProject == undefined || project !== defaultProject.folder ? project : undefined,
+        defaultProject == undefined || project !== defaultProject.folder
+          ? project
+          : undefined,
     })
   },
 )

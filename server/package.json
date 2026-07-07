@@ -1,10 +1,10 @@
 {
   "name": "leanweb-server",
   "private": true,
-  "type": "module",
   "bin": {
     "server": "index.mjs"
   },
+  "type": "module",
   "scripts": {
     "dev": "NODE_ENV=development nodemon index.mjs",
     "prod": "NODE_ENV=production nodemon index.mjs",
@@ -15,7 +15,8 @@
     "ip-anonymize": "^0.1.0",
     "memfs": "^4.51.1",
     "nocache": "^4.0.0",
-    "ws": "^8.18.3"
+    "ws": "^8.18.3",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",

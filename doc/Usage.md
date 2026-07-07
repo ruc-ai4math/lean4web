@@ -42,6 +42,13 @@ The recognised settings are:
   - `showGoalNames`: show goal names in Lean infoview box. default: `true`
   - `showExpectedType`: expected type in Lean infoview opened by default. default: `false`
   - `wordWrap`: wrap code in editor box. default: `true`
+  - `ruler`: a `number`. If specified, the column at which to display the ruler. default: ``
 - Non-boolean settings:
 - `abbreviationCharacter`: lead character for unicode abbreviations. values: a character. default: `\`
 - `theme`: selection between one light and dark theme. More themes are available in the settings, but they cannot be set through the URL. values: `light` or `dark`. default: `light` (TODO: infererred from browser)
+
+### Collaboration
+
+The collaboration feature allows to simultaneously view and edit code across multiple users. The code is still synchronised with the URL-arguments as described above, the collaboration connection simply ensures all connected browsers are updated synchonously.
+
+A shared connection is established when users start a collaboration room with the same room name and password. If one user creates "TestRoom" without a password and the other user "TestRoom" with password "123", they will be in two distinct collaboration rooms.

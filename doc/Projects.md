@@ -24,8 +24,12 @@ The name of the folder is simultaneously the key used in the URL, e.g. a project
 
 You might want to look at the provided `MathlibDemo` project for comparison.
 
-**Important**: In order for `lake` to use any `leanOptions` specified in the project's lakefile, you must make sure there is a file `Projects/MyCoolProject/MyCoolProject.lean`
-where folder name and file name coincide.
+## project structure
+
+Any lake project can be used as a project. However, same features make some assumptions:
+
+- In order for `lake` to use any `leanOptions` specified in the project's lakefile, you must make sure there is a file `Projects/MyCoolProject/MyCoolProject.lean` where folder name and file name coincide.
+- The download button creates a ZIP where the editor content is placed in `MyCoolProject/MyCoolProject.lean` and the files `lean_toolchain`, `lake-manifest.json`, `lakefile.lean` (or `lakefile.toml`) are copied over. In particular, if the lakefile defines other targets, the downloaded lake project might not work as there might be missing these files.
 
 ## project config
 
@@ -36,6 +40,7 @@ The file `leanweb-config.json` takes the following form:
   "name": "Display name",
   "default": false,
   "hidden": false,
+  "sortOrder": 0,
   "examples": [
     { "file": "MathlibDemo/Bijection.lean", "name": "Example's display name" },
     ...
@@ -43,12 +48,22 @@ The file `leanweb-config.json` takes the following form:
 }
 ```
 
-- `name`: The display name of the project as shown in the dropdown menu
+- `name`: The display name of the project as shown in the dropdown menu. The substrings `_Vers_` and
+  `_LeanVers_` in the project name will be replaced by indicators of which version is being used:
+  - If the toolchain is in a recognized format (a regular release like `v4.30.0-rc1` or nightly
+    release like `2026-04-04`), then `_Vers_` will be replaced by the version number (e.g.
+    `v4.30.0-rc1`) and `_LeanVers_` will be replaced by "Lean" followed by the version number (e.g.
+    `Lean v4.30.0-rc1`)
+  - If the toolchain is not in a recognized format, both `_Vers_` and `_LeanVers_` will be replaced
+    by "Lean".
 - `default`: There must be exactly one project with this set to `true`. This is the project loaded
   by default and when no project is specified in the url.
 - `hidden`: If set to `true`, then the project does not appear in the dropdown and can
   only be accessed via direct link.
-- `examples`: list of examples. The path is relativ to the project's directory, e.g. `{PROJECTS_BASE_PATH}/{PROJECT_FOLDER}/{EXAMPLE_PATH.lean}`
+- `sortOrder`(non-negative number): sort order of the projects in the dropdown. The default always
+  comes first, then projects with higher `sortOrder` value. Ties are resolved alphabetically.
+- `examples`: list of examples. The path is relativ to the project's directory, e.g.
+  `{PROJECTS_BASE_PATH}/{PROJECT_FOLDER}/{EXAMPLE_PATH.lean}`
 
 ## automatic builds
 

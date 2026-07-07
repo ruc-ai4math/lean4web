@@ -53,9 +53,17 @@ input[type='file'] {
   }
 }
 
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .modal input[type='text'],
+.modal input[type='password'],
 .modal textarea {
   width: 100%;
+  box-sizing: border-box;
 }
 
 .modal textarea {
@@ -64,24 +72,56 @@ input[type='file'] {
 
 .modal .form-error {
   color: var(--vscode-editorError-foreground);
-  font-weight: bold;
+  font-size: 14px;
 }
 
 .modal input[type='submit'],
-.modal button,
+.modal button:not(.modal-close),
 .modal .file-upload-button {
-  border: none;
   color: var(--vscode-button-foreground);
   background: var(--vscode-button-background);
+  border: 1px solid var(--vscode-button-border);
   cursor: pointer;
   padding: 0.5rem 1rem;
   border-radius: 0.2rem;
 }
 
 .modal input[type='submit'],
-.modal button {
+.modal button:not(.modal-close) {
   display: block;
   margin: 1rem auto;
+}
+
+.modal input[type='text'],
+.modal input[type='password'],
+.modal select {
+  padding: 10px 12px;
+
+  border: 1px solid var(--vscode-input-foreground);
+  border-radius: 6px;
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+}
+
+.modal .ruler-input {
+  margin-left: 8px;
+}
+
+.ruler-input input {
+  padding: 4px;
+}
+
+.modal input[type='password'] {
+  font-family: 'JuliaMono';
+}
+
+.modal #abbreviationCharacter {
+  width: 35px;
+  margin-left: 4px;
+}
+
+.modal .MuiSwitch-track {
+  background-color: var(--vscode-input-foreground);
 }
 
 .modal .flex {
@@ -97,6 +137,11 @@ input[type='file'] {
 .modal-close {
   float: right;
   scale: 2;
+  border: unset;
+  margin: 0;
+  padding: 4px;
+  background-color: unset;
+  border-radius: 4px;
   color: var(--vscode-input-foreground);
   cursor: pointer;
 }
@@ -104,7 +149,9 @@ input[type='file'] {
 .modal-close:hover {
   float: right;
   scale: 2;
-  color: var(--vscode-inputOption-activeForeground); /* TODO: what's the best var to use here? */
+  color: var(
+    --vscode-inputOption-activeForeground
+  ); /* TODO: what's the best var to use here? */
 }
 
 .modal table {
@@ -114,4 +161,8 @@ input[type='file'] {
 a {
   text-decoration: none;
   color: var(--vscode-textLink-foreground);
+}
+
+.button-row {
+  display: flex;
 }

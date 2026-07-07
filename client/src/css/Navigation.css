@@ -4,22 +4,26 @@ nav {
   background-color: var(--vscode-menu-background);
   color: var(--vscode-menu-foreground);
   z-index: 1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 /* The Lean logo */
-nav > svg {
-  height: 2.2rem;
+nav .logo {
+  height: 1rem;
   width: unset;
   vertical-align: middle;
-  margin-left: 0.5rem;
-  margin-right: 1rem;
+  padding: 0.5rem;
   filter: invert(1);
   mix-blend-mode: difference;
+  flex-shrink: 0;
 }
 
-/* The top bar with menu items. */
-nav .menu {
-  float: right;
+/* The menu items in the he top bar */
+nav select {
+  margin-left: auto;
 }
 
 /* A dropdown comprises a `nav-link` and a `dropdown-content`. The latter has absolute
@@ -64,7 +68,8 @@ nav .dropdown-overlay {
 }
 
 /* The menu items */
-nav .nav-link {
+nav .nav-link,
+nav select {
   background: none;
   border: none;
   color: inherit;
@@ -75,6 +80,7 @@ nav .nav-link {
   padding-right: 0.8rem;
   padding-top: 0.6rem;
   padding-bottom: 0.6rem;
+  flex-shrink: 0;
 }
 
 /* Zulip logo (instead of font-awesome icon) */
@@ -82,14 +88,47 @@ nav .nav-link svg {
   width: 1.4rem;
 }
 
-nav .nav-link:hover {
+/* Hide unecessary items in navigation on small screens */
+@media only screen and (max-width: 400px) {
+  /* Lean Logo */
+  nav .logo {
+    display: none;
+  }
+}
+@media only screen and (max-width: 500px) {
+  /* button text */
+  nav > .nav-link span {
+    display: none;
+  }
+}
+
+nav .nav-link:hover,
+nav select:hover {
   color: var(--vscode-menu-selectionForeground);
   background-color: var(--vscode-menu-selectionBackground);
 }
 
-nav select {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
+nav .nav-link.leave-collab-button {
+  animation: pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+nav .nav-link.leave-collab-button span {
+  font-size: 0.8rem;
+}
+
+nav .nav-link.leave-collab-button:hover {
+  color: unset;
+  background-color: unset;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .tooltip {
@@ -100,8 +139,9 @@ nav select {
 .tooltip .tooltiptext {
   visibility: hidden;
   min-width: 300px;
-  background-color: var(--vscode-input-foreground);
-  color: var(--vscode-input-background);
+  background-color: var(--vscode-editorHoverWidget-background);
+  color: var(--vscode-editorHoverWidget-foreground);
+  border: 1px solid var(--vscode-editorHoverWidget-border);
   text-align: left;
   border-radius: 5px;
   padding: 10px;
@@ -139,14 +179,14 @@ nav select {
 
 .tooltip .tooltiptext .commit-author {
   font-style: italic;
-  color: #bbb;
+  opacity: 0.6;
 }
 
 .tooltip .tooltiptext .commit-date {
-  color: #bbb;
+  opacity: 0.6;
 }
 
 .tooltip .tooltiptext .commit-sha {
   font-style: italic;
-  color: #5cb6de;
+  color: var(--vscode-textLink-foreground);
 }

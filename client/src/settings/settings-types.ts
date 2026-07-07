@@ -1,13 +1,3 @@
-// const isBrowserDefaultDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches
-
-export type Theme =
-  | 'Visual Studio Light'
-  | 'Visual Studio Dark'
-  | 'Default High Contrast'
-  | 'Cobalt'
-
-export type MobileValues = boolean | 'auto'
-
 /** Type for the settings, including internal ones */
 export interface Settings {
   /** Lead character to trigger unicode input mode */
@@ -20,6 +10,8 @@ export interface Settings {
   showExpectedType: boolean
   /** Compress the `code=` in the URL into `codez=` using LZ-string */
   compress: boolean
+  /** If present, show a ruler at the specified position */
+  ruler?: number
   /** Display code editor and infoview in narrow, vertically stacked, mobile-friendly mode.
    * Usually inferred from window width. */
   mobile: MobileValues
@@ -38,6 +30,8 @@ export interface Settings {
 /** The settings which are not internal */
 export type UserSettings = Omit<Settings, 'saved' | 'inUrl'>
 
+export type MobileValues = boolean | 'auto'
+
 /** Same as `UserSettings` but everything is optional, since single keys might be missing in the browser store */
 export type PartialUserSettings = Partial<UserSettings>
 
@@ -49,9 +43,15 @@ export const defaultSettings: UserSettings = {
   showExpectedType: false,
   compress: true,
   mobile: 'auto',
-  theme: 'Visual Studio Light', // TODO: introduce "auto" which takes the browser setting.
+  theme: isBrowserDefaultDark() ? 'Visual Studio Dark' : 'Visual Studio Light',
   wordWrap: true,
 }
+
+export type Theme =
+  | 'Visual Studio Light'
+  | 'Visual Studio Dark'
+  | 'Default High Contrast'
+  | 'Cobalt'
 
 /**
  * For CodeMirror (on mobile only)
@@ -59,3 +59,8 @@ export const defaultSettings: UserSettings = {
  * unless the theme is in this list.
  */
 export const lightThemes: Theme[] = ['Visual Studio Light']
+
+/** Returns true if the browser wants dark mode */
+function isBrowserDefaultDark() {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+}

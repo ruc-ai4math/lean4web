@@ -2,6 +2,7 @@ import { atom } from 'jotai'
 import { atomWithQuery } from 'jotai-tanstack-query'
 
 import { lookupUrl } from '../utils/UrlParsing'
+import { currentProjectAtom } from './project-atoms'
 import { urlArgsAtom, urlArgsStableAtom } from './url-atoms'
 
 /**
@@ -10,7 +11,45 @@ import { urlArgsAtom, urlArgsStableAtom } from './url-atoms'
  * This is needed for the comparison which puts the URL back into the location hash if
  * the current code matches the one from the import-URL.
  */
-export const importUrlAtom = atom<string>()
+export const importUrlBaseAtom = atom<string>()
+
+/**
+ *
+ *
+ */
+export const importUrlAtom = atom(
+  (get) => {
+    return get(urlArgsStableAtom).url ?? get(importUrlBaseAtom)
+  },
+  (get, set, url: string) => {
+    const urlArgs = get(urlArgsStableAtom)
+    set(importUrlBaseAtom, url)
+    set(urlArgsAtom, {
+      ...urlArgs,
+      url: url,
+      code: undefined,
+      codez: undefined,
+    })
+  },
+)
+
+/** Query to fetch the code from the import URL */
+const importedCodeQueryAtom = atomWithQuery((get) => {
+  const url = get(importUrlAtom)
+  return {
+    queryKey: ['importedCode', url],
+    queryFn: async () => {
+      if (!url) return undefined
+      const res = await fetch(lookupUrl(url))
+      const code = res.ok
+        ? await res.text()
+        : `Error: failed to load code from ${url}`
+      return code
+    },
+    enabled: url != undefined,
+    keepPreviousData: true,
+  }
+})
 
 /**
  * Stores the imported code.
@@ -18,26 +57,8 @@ export const importUrlAtom = atom<string>()
  * This is needed for the comparison which puts the URL back into the location hash if
  * the current code matches the one from the import-URL.
  */
-export const importedCodeAtom = atom<string>()
-
-/** Query to fetch the code from the import URL */
-const freshlyImportedCodeQueryAtom = atomWithQuery((get) => {
-  const url = get(urlArgsStableAtom).url
-  return {
-    queryKey: ['importedCode', url],
-    queryFn: async () => {
-      if (!url) return undefined
-      const res = await fetch(lookupUrl(url))
-      const code = res.ok ? await res.text() : `Error: failed to load code from ${url}`
-      return code
-    },
-    enabled: url !== undefined,
-    keepPreviousData: true,
-  }
-})
-
-export const freshlyImportedCodeAtom = atom((get) => {
-  const { data } = get(freshlyImportedCodeQueryAtom)
+export const importedCodeAtom = atom((get) => {
+  const { data } = get(importedCodeQueryAtom)
   return data
 })
 
@@ -49,13 +70,9 @@ export const freshlyImportedCodeAtom = atom((get) => {
 export const setImportUrlAndProjectAtom = atom(
   null,
   (get, set, val: { url: string; project?: string }) => {
-    const urlArgs = get(urlArgsStableAtom)
-    set(urlArgsAtom, {
-      ...urlArgs,
-      url: val.url,
-      project: val.project ?? urlArgs.project,
-      code: undefined,
-      codez: undefined,
-    })
+    set(importUrlAtom, val.url) // TODO: should there be some decoding of the input?
+    if (val.project) {
+      set(currentProjectAtom, val.project)
+    }
   },
 )
