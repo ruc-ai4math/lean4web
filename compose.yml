@@ -1,0 +1,19 @@
+services:
+  lean4web:
+    image: lean4web:mathlib-${LEANWEB_PROJECT_VERSION:-master}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        LEANWEB_BUILD_PROJECT: MathlibDemo
+        LEANWEB_PROJECT_VERSION: ${LEANWEB_PROJECT_VERSION:-master}
+    environment:
+      PORT: "8080"
+      NO_BWRAP: "false"
+    ports:
+      - "8080:8080"
+    security_opt:
+      - seccomp=unconfined
+      - apparmor=unconfined
+    privileged: true
+    restart: unless-stopped

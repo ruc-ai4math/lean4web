@@ -1,20 +1,26 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 # Operate in the directory where this file is located
-cd $(dirname $0)
+cd "$(dirname "$0")"
 
-# Updating Mathlib: We follow the instructions at
-# https://github.com/leanprover-community/mathlib4/wiki/Using-mathlib4-as-a-dependency#updating-mathlib4
+MATHLIB_REV="${LEANWEB_PROJECT_VERSION:-${MATHLIB_REV:-master}}"
+MATHLIB_TOOLCHAIN_URL="https://raw.githubusercontent.com/leanprover-community/mathlib4/${MATHLIB_REV}/lean-toolchain"
 
-# Note: we had once problems with the `lake-manifest` when a new dependency got added
-# to `mathlib`, we may need to add `rm lake-manifest.json` again if that's still a problem.
+echo "Using mathlib revision: ${MATHLIB_REV}"
 
-# currently the mathlib post-update-hook is not good enough to update the lean-toolchain.
-# things break if the new lakefile is not valid in the old lean version
-curl -L https://raw.githubusercontent.com/leanprover-community/mathlib4/master/lean-toolchain -o lean-toolchain
+# Keep lakefile pinned to the requested revision so `lake update -R` only
+# fetches the matching mathlib dependency graph.
+escaped_mathlib_rev="$(printf "%s" "${MATHLIB_REV}" | sed 's/[\\&/]/\\&/g')"
+sed -i "s/^rev = \".*\"$/rev = \"${escaped_mathlib_rev}\"/" lakefile.toml
 
-# note: mathlib has now a post-update hook that modifies the `lean-toolchain`
-# and calls `lake exe cache get`.
+# Fetch the matching Lean toolchain used by this exact mathlib revision.
+curl -fsSL "${MATHLIB_TOOLCHAIN_URL}" -o lean-toolchain
+
+# Force a clean dependency resolve for revision switches.
+rm -f lake-manifest.json
+rm -rf .lake/packages/mathlib .lake/packages/batteries
 
 lake update -R
 lake build

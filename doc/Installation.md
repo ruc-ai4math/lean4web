@@ -94,6 +94,55 @@ On a running system, you might already have these installed, if not:
   SSL_CRT_FILE=/path/to/crt_file.cer SSL_KEY_FILE=/path/to/private_ssl_key.pem npm run prod
   ```
 
+### Docker build
+
+A multi-stage `Dockerfile` is provided at the repository root.
+
+You can choose one project to include in the image and pin its mathlib revision at build time.
+The build script then fetches the matching `lean-toolchain` from that exact mathlib revision and
+compiles it into the image.
+
+- Build an image:
+  ```
+  docker build \
+    --build-arg LEANWEB_BUILD_PROJECT=MathlibDemo \
+    --build-arg LEANWEB_PROJECT_VERSION=v4.29.0 \
+    -t lean4web:mathlib-v4.29.0 .
+  ```
+- Run it:
+  ```
+  docker run --rm -p 8080:8080 \
+    --privileged \
+    lean4web:mathlib-v4.29.0
+  ```
+- Shortcut script (version only):
+  ```
+  ./build-docker.sh v4.29.0
+  ```
+- Export image to file:
+  ```
+  ./export-docker-image.sh v4.29.0
+  ```
+- Import image from file:
+  ```
+  ./import-docker-image.sh ./lean4web-mathlib-v4.29.0.tar
+  ```
+- Start with Docker Compose:
+  ```
+  LEANWEB_PROJECT_VERSION=v4.29.0 docker compose -f compose.yml up --build -d
+  ```
+- Stop Docker Compose:
+  ```
+  docker compose -f compose.yml down
+  ```
+
+Build arguments:
+
+| name                      | default       | description                                                                                       |
+| ------------------------- | ------------- | ------------------------------------------------------------------------------------------------- |
+| `LEANWEB_BUILD_PROJECT`   | `MathlibDemo` | Project folder copied into the image from `Projects/`                                             |
+| `LEANWEB_PROJECT_VERSION` | `master`      | mathlib git revision (tag, branch, or commit) used for `MathlibDemo` and matching `lean-toolchain` |
+
 ### Adding different Lean projects
 
 You can run any lean project through the webeditor by cloning them to the `Projects/` folder. See [Adding Projects](./Projects.md) for further instructions.
